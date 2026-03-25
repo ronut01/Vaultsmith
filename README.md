@@ -1,39 +1,98 @@
 # Vaultsmith
 
-Vaultsmith is a local agent launcher for Obsidian vault workflows. It starts `codex` or `claude` inside `tmux`, seeds the vault with role prompts and bootstrap instructions, and keeps session state in `.vaultsmith/`.
+**AI for Obsidian that works like the vault owner, not like a generic note bot.**
+
+Vaultsmith is a local agent launcher and review-first workflow for Obsidian vaults. It sets up vault-local instructions, starts `codex` or `claude` inside `tmux`, and gives the agent a constrained operating surface so note creation and organization can stay consistent with how the vault already works.
+
+## Why Vaultsmith exists
+
+Most AI note tooling can generate text.
+
+What it usually does badly:
+
+- titles notes in a way that does not match the vault
+- picks the wrong folder
+- ignores linking habits and structure conventions
+- rewrites too much when a small edit would do
+- makes users manually clean up the result afterward
+
+Vaultsmith exists to push the agent in the opposite direction:
+
+- inspect the vault before making style claims
+- prefer minimal edits over broad rewrites
+- keep proposals short and reviewable
+- treat vault conventions as a first-class constraint
+- make approval explicit before applying edits
+
+## What it does today
+
+Vaultsmith currently ships a practical local workflow:
+
+- initializes a vault-local `.vaultsmith/` workspace
+- writes role prompts and bootstrap instructions for Codex and Claude
+- launches agent sessions in `tmux`
+- defaults to a review-first flow with proposal and receipt files
+- lets you inspect status, tail output, approve, and apply
+- keeps a small vault memory file for durable conventions
+
+It is intentionally narrow right now. The current product is a launcher and guardrail layer for agent-driven vault work, not a full autonomous vault intelligence system yet.
+
+## Core idea
+
+Vaultsmith should help an agent behave more like the person who owns the vault.
+
+That means the agent should learn and respect signals such as:
+
+- naming patterns
+- folder placement habits
+- heading structure
+- bullet and checklist style
+- link and tag behavior
+- frontmatter usage
+- note family conventions
+
+The long-term direction is simple: when Vaultsmith creates or reorganizes a note, it should feel native to the vault immediately.
 
 ## Quick start
 
+Requirements:
+
+- Python 3.11+
+- `tmux`
+- at least one supported agent CLI on `PATH`: `codex` or `claude`
+
+Install locally:
+
 ```bash
+cd /Users/sangyoonkwon/Vaultsmith
+source .venv/bin/activate
 python -m pip install -e .
+```
+
+Initialize a vault:
+
+```bash
 vsm setup ~/obsidian/MyVault
 cd ~/obsidian/MyVault
+```
+
+Start an interactive session:
+
+```bash
 vsm chat
 ```
 
-Useful commands:
+Run a one-shot request:
 
 ```bash
 vsm run -- "현재 정리 안 된 노트 정리해줘"
-vsm review
-vsm approve
-vsm apply
-vsm status
-vsm tail
-vsm sessions
-vsm alias enable vs
 ```
 
-## Review-first flow
+## Review-first workflow
 
-Vaultsmith stores each session under `.vaultsmith/sessions/<session-id>/`.
+Vaultsmith is designed so the agent proposes work before it applies work.
 
-- `session.json`: session metadata and approval state
-- `proposal.md`: agent-authored review proposal
-- `approval.md`: approval checkpoint written by `vsm approve`
-- `receipt.md`: execution receipt written after apply
-
-Recommended flow:
+Typical flow:
 
 ```bash
 vsm run -- "강의 영상 링크 정리해줘"
@@ -42,37 +101,132 @@ vsm approve
 vsm apply
 ```
 
-`vsm run` now attaches to the agent session by default so you can answer trust prompts and other interactive questions directly. For Codex, Vaultsmith starts a fresh session with the initial bootstrap and user request passed as the startup prompt, instead of typing into an already-running TUI. Use `vsm run --detach -- "..."` if you want background behavior.
-
-`vsm apply` does not apply a structured patch itself. It re-dispatches the approved session to the underlying agent, which performs the vault edits and writes a `receipt.md` summary afterward.
-
-To see whether a background session is still alive and what it is currently doing:
-
-- `vsm status`
-- `vsm tail`
-
-If Codex asks whether it should trust the current directory, Vaultsmith now leaves that choice to you.
-In that case `vsm run` will attach you to the tmux-backed Codex session automatically so you can choose directly.
-You can also re-attach manually with:
+Useful follow-up commands:
 
 ```bash
+vsm status
+vsm tail
+vsm sessions
 vsm resume <session-id>
 ```
 
-Choose in the attached Codex session, then continue monitoring with `vsm status` and `vsm tail`.
+Behavior notes:
 
-Example `proposal.md`:
+- `vsm run` attaches by default so you can respond to trust prompts and other interactive agent questions
+- `vsm run --detach -- "..."` keeps the run in the background and prints recent tmux output
+- `vsm apply` does not patch files itself; it re-dispatches the approved session to the underlying agent and then expects a `receipt.md`
 
-```md
-# Proposal
+## What gets written into a vault
 
-Summary: summarize the lecture and file it in the existing course folder.
+Running `vsm setup <vault>` creates a small control plane inside the target vault:
 
-Planned work:
-- create `Courses/ML/Lecture 07.md`
-- move `Inbox/ml-rough-notes.md` to `Archive/ml-rough-notes-2026-03-25.md`
-
-Draft:
-## Key Ideas
-- ...
+```text
+.vaultsmith/
+  config.toml
+  instructions/
+    codex.md
+    claude.md
+  memory/
+    vault-summary.md
+  roles/
+    input-agent.md
+    vault-analyst.md
+    research-scout.md
+    draft-agent.md
+    consistency-reviewer.md
+  sessions/
+    <session-id>/
+      session.json
+      proposal.md
+      approval.md
+      receipt.md
+      changes.json
+AGENTS.md
+CLAUDE.md
 ```
+
+Session files matter:
+
+- `session.json`: metadata, mode, runtime state, approval state
+- `proposal.md`: short proposed plan and draft output before edits are applied
+- `approval.md`: approval checkpoint
+- `receipt.md`: short execution summary after apply
+- `changes.json`: proposed operations payload when the session provides one
+
+## Command overview
+
+```bash
+vsm setup <path>          # initialize Vaultsmith in a vault
+vsm chat [path]           # start an interactive agent session
+vsm run [path] -- "..."   # start a one-shot request
+vsm status [session-id]   # inspect current or selected session
+vsm tail [session-id]     # show recent tmux output
+vsm review [session-id]   # print proposal.md
+vsm approve [session-id]  # mark session approved
+vsm apply [session-id]    # dispatch approved work
+vsm sessions              # list recent sessions
+vsm resume <session-id>   # re-attach to tmux session
+vsm alias enable vs       # install a shorthand shell alias
+```
+
+## Philosophy
+
+Vaultsmith is opinionated in a few ways.
+
+### 1. Inspect before generating
+
+The vault is the source of truth. The agent should look at local evidence before inventing a structure or style.
+
+### 2. Small context beats full-vault scans
+
+For most requests, a few relevant notes are better than a noisy global survey.
+
+### 3. Review before apply
+
+Users should be able to inspect, reject, or refine proposed changes before the agent edits the vault.
+
+### 4. Minimal edits over dramatic rewrites
+
+Most vault work is maintenance, not greenfield writing. The safe default is a narrow change.
+
+## Current scope vs. direction
+
+Current scope:
+
+- local CLI
+- tmux-backed agent launch
+- vault bootstrap files
+- review-first session workflow
+- basic session state and approval handling
+
+Planned direction:
+
+- stronger vault-style profiling
+- better note placement and naming inference
+- more explicit explanation for why a note was titled or placed a certain way
+- better support for recurring note families like meetings, research notes, and project updates
+
+## Development
+
+Run tests:
+
+```bash
+cd /Users/sangyoonkwon/Vaultsmith
+source .venv/bin/activate
+pytest -q
+```
+
+Smoke test against a temporary vault:
+
+```bash
+mkdir -p /tmp/vsm-smoke-vault
+vsm setup /tmp/vsm-smoke-vault
+cd /tmp/vsm-smoke-vault
+vsm run -- "테스트 노트를 하나 만들고 지금 vault 상태를 설명해줘"
+```
+
+## Status
+
+Vaultsmith is early, but the direction is deliberate.
+
+The goal is not to bolt AI onto Obsidian. The goal is to make an agent operate inside a vault with enough structure, memory, and review pressure that the output starts to feel like it belongs there.
