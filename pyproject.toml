@@ -12,6 +12,23 @@ authors = [
   { name = "Vaultsmith" }
 ]
 dependencies = []
+keywords = ["obsidian", "obsidian-vault", "ai-agents", "note-taking", "tmux"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Environment :: Console",
+  "Intended Audience :: End Users/Desktop",
+  "Topic :: Text Processing :: Markup :: Markdown",
+  "Topic :: Utilities",
+]
+
+[project.urls]
+Homepage = "https://github.com/ronut01/Vaultsmith"
+Repository = "https://github.com/ronut01/Vaultsmith"
+Issues = "https://github.com/ronut01/Vaultsmith/issues"
 
 [project.scripts]
 vsm = "vaultsmith.cli:main"

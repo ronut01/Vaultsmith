@@ -58,31 +58,51 @@ The long-term direction is simple: when Vaultsmith creates or reorganizes a note
 Requirements:
 
 - Python 3.11+
+- `pipx`
 - `tmux`
 - at least one supported agent CLI on `PATH`: `codex` or `claude`
 
-Install locally:
+### One-line install path
+
+Today, the shortest install path is directly from GitHub:
 
 ```bash
-cd /Users/sangyoonkwon/Vaultsmith
-source .venv/bin/activate
-python -m pip install -e .
+pipx install git+https://github.com/ronut01/Vaultsmith.git
+vsm setup ~/Obsidian/MyVault
+cd ~/Obsidian/MyVault
+vsm run -- "정리해줘"
 ```
 
-Initialize a vault:
+After Vaultsmith is published to PyPI, the intended flow becomes:
 
 ```bash
+pipx install vaultsmith
 vsm setup ~/obsidian/MyVault
 cd ~/obsidian/MyVault
+vsm run -- "정리해줘"
 ```
 
-Start an interactive session:
+### Install for local development
+
+If you are working on Vaultsmith itself:
+
+```bash
+git clone https://github.com/ronut01/Vaultsmith.git
+cd Vaultsmith
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -e . pytest
+```
+
+### First commands
+
+Interactive session:
 
 ```bash
 vsm chat
 ```
 
-Run a one-shot request:
+One-shot request:
 
 ```bash
 vsm run -- "현재 정리 안 된 노트 정리해줘"
@@ -211,8 +231,8 @@ Planned direction:
 Run tests:
 
 ```bash
-cd /Users/sangyoonkwon/Vaultsmith
-source .venv/bin/activate
+cd Vaultsmith
+source .venv/bin/activate  # or the virtualenv you use for local development
 pytest -q
 ```
 
