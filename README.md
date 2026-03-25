@@ -64,10 +64,10 @@ Requirements:
 
 ### One-line install path
 
-Today, the shortest install path is directly from GitHub:
+The default install path is:
 
 ```bash
-pipx install git+https://github.com/ronut01/Vaultsmith.git
+pipx install vaultsmith
 vsm setup ~/Obsidian/MyVault
 cd ~/Obsidian/MyVault
 vsm run -- "정리해줘"
@@ -82,7 +82,7 @@ If you prefer `pip`, install Vaultsmith into a virtual environment:
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install git+https://github.com/ronut01/Vaultsmith.git
+python -m pip install vaultsmith
 ```
 
 ### Install for local development
@@ -96,15 +96,6 @@ python -m venv .venv
 source .venv/bin/activate
 python -m pip install -e . pytest
 ```
-
-### Distribution status
-
-Vaultsmith is not published to PyPI yet.
-
-The intended release path is:
-
-- `pipx install vaultsmith` for end users
-- `python -m pip install vaultsmith` inside a virtualenv for users who prefer `pip`
 
 ### First commands
 
