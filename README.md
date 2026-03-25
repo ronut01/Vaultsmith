@@ -73,13 +73,16 @@ cd ~/Obsidian/MyVault
 vsm run -- "정리해줘"
 ```
 
-After Vaultsmith is published to PyPI, the intended flow becomes:
+### Why `pipx` is the default
+
+Vaultsmith is a CLI tool, not a library. `pipx` is the cleanest default because it installs the command into an isolated environment without making users create a project virtualenv just to try the tool.
+
+If you prefer `pip`, install Vaultsmith into a virtual environment:
 
 ```bash
-pipx install vaultsmith
-vsm setup ~/obsidian/MyVault
-cd ~/obsidian/MyVault
-vsm run -- "정리해줘"
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install git+https://github.com/ronut01/Vaultsmith.git
 ```
 
 ### Install for local development
@@ -93,6 +96,15 @@ python -m venv .venv
 source .venv/bin/activate
 python -m pip install -e . pytest
 ```
+
+### Distribution status
+
+Vaultsmith is not published to PyPI yet.
+
+The intended release path is:
+
+- `pipx install vaultsmith` for end users
+- `python -m pip install vaultsmith` inside a virtualenv for users who prefer `pip`
 
 ### First commands
 
