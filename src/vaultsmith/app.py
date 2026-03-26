@@ -83,6 +83,13 @@ INSTRUCTION_DOCS = {
     - Prefer the smallest set of candidate files that can answer the task.
     - Keep `proposal.md` under 8 bullets and `receipt.md` under 6 bullets.
     - Prefer moving, renaming, or lightly editing files over rewriting large notes.
+
+    Obsidian CLI rules:
+    - If the `obsidian` CLI is available and usable, prefer it for vault-aware actions.
+    - Prefer `obsidian rename` over raw shell rename operations when renaming notes.
+    - Prefer `obsidian create`, `obsidian read`, and `obsidian search` over generic shell commands when they fit the task.
+    - Consider `obsidian move` for relocation when it behaves correctly in the current vault, but keep direct file operations as the safe fallback.
+    - If the `obsidian` CLI is unavailable or a command fails, fall back to direct file operations.
     """,
     "claude.md": """
     # Vaultsmith Claude Bootstrap
@@ -101,6 +108,13 @@ INSTRUCTION_DOCS = {
     - Default to direct work.
     - Use at most 1 helper for vault-only work, or 2 for mixed vault + external work.
     - Keep `proposal.md` and `receipt.md` terse.
+
+    Obsidian CLI rules:
+    - If the `obsidian` CLI is available and usable, prefer it for vault-aware actions.
+    - Prefer `obsidian rename` over raw shell rename operations when renaming notes.
+    - Prefer `obsidian create`, `obsidian read`, and `obsidian search` over generic shell commands when they fit the task.
+    - Consider `obsidian move` for relocation when it behaves correctly in the current vault, but keep direct file operations as the safe fallback.
+    - If the `obsidian` CLI is unavailable or a command fails, fall back to direct file operations.
     """,
 }
 
@@ -387,6 +401,37 @@ def agent_available(agent: str) -> bool:
     return shutil.which(agent) is not None
 
 
+def obsidian_cli_available() -> bool:
+    return shutil.which("obsidian") is not None
+
+
+def obsidian_cli_guidance() -> str:
+    if obsidian_cli_available():
+        availability = (
+            "- The `obsidian` CLI is available on PATH in this environment. Check whether it is "
+            "usable for the current action before falling back."
+        )
+    else:
+        availability = (
+            "- The `obsidian` CLI was not detected on PATH in this environment. Use shell/file "
+            "operations unless you explicitly confirm it is available another way."
+        )
+    return textwrap.dedent(
+        f"""
+        Obsidian CLI rules:
+        {availability}
+        - Prefer `obsidian rename` over raw shell rename operations when renaming notes, because
+          Obsidian can keep internal links consistent.
+        - Prefer `obsidian create`, `obsidian read`, and `obsidian search` for note creation,
+          retrieval, and search when those commands fit the task.
+        - Consider `obsidian move` for relocation when it behaves correctly in the current vault,
+          but keep direct file operations as the safe fallback.
+        - If an `obsidian` command is unavailable, unsupported, or fails, fall back to direct file
+          edits and shell commands.
+        """
+    ).strip()
+
+
 def agent_command(agent: str, bootstrap_prompt: str, request: str | None) -> tuple[list[str], bool]:
     unset_vars: list[str] = []
     for key in os.environ:
@@ -474,6 +519,8 @@ def launch_tmux_session(
         - After apply approval arrives, implement the approved proposal in the vault and
           write a concise execution receipt to `.vaultsmith/sessions/{session_id}/receipt.md`
           in under 6 bullets.
+
+        {obsidian_cli_guidance()}
         """
     ).strip()
     launch_command, prompt_is_embedded = agent_command(agent, bootstrap_prompt, request)
@@ -682,6 +729,12 @@ def build_apply_prompt(ctx: VaultContext, session: dict[str, Any], proposal: str
         - You may create, edit, move, rename, or delete files if the approved proposal calls for it.
         - Do not produce a new proposal instead of applying.
         - If you must deviate from the proposal, keep the deviation minimal and explain it.
+        - When the `obsidian` CLI is available and the operation fits, prefer it for create, read,
+          search, and rename actions.
+        - Treat `obsidian move` as optional and use it only when it behaves correctly in the
+          current vault.
+        - If an `obsidian` command is unavailable, unsupported, or fails, fall back to direct file
+          operations.
         - After applying, write `{receipt_file.relative_to(ctx.root)}` with:
           1. files touched
           2. actions performed

@@ -65,6 +65,7 @@ Requirements:
 - `pipx`
 - `tmux`
 - at least one supported agent CLI on `PATH`: `codex` or `claude`
+- optional but recommended: the `obsidian` CLI for vault-aware create/read/search/move/rename actions
 
 ### One-line install path
 

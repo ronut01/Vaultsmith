@@ -341,6 +341,72 @@ def test_agent_command_sanitizes_codex_env_and_embeds_prompt(monkeypatch) -> Non
     assert command[-1] == "BOOTSTRAP\n\nUser request:\n정리해줘"
 
 
+def test_obsidian_cli_guidance_reflects_detected_availability(monkeypatch) -> None:
+    monkeypatch.setattr(app_module, "obsidian_cli_available", lambda: True)
+
+    guidance = app_module.obsidian_cli_guidance()
+
+    assert "available on PATH" in guidance
+    assert "obsidian rename" in guidance
+    assert "obsidian search" in guidance
+    assert "Consider `obsidian move`" in guidance
+
+
+def test_launch_tmux_session_includes_obsidian_cli_guidance(tmp_path: Path, monkeypatch) -> None:
+    vault = tmp_path / "vault"
+    cli.main(["setup", str(vault)])
+    ctx = build_context(vault)
+
+    commands: list[list[str]] = []
+
+    def fake_run_subprocess(args, *, cwd=None, capture_output=True, check=True):
+        commands.append(args)
+
+        class Result:
+            stdout = ""
+
+        return Result()
+
+    monkeypatch.setattr(app_module, "tmux_available", lambda: True)
+    monkeypatch.setattr(app_module, "agent_available", lambda agent: True)
+    monkeypatch.setattr(app_module, "run_subprocess", fake_run_subprocess)
+    monkeypatch.setattr(app_module, "capture_tmux_output", lambda ctx, session_name, scroll="-200": None)
+    monkeypatch.setattr(app_module, "runtime_state", lambda ctx, session: "running")
+    monkeypatch.setattr(app_module, "obsidian_cli_available", lambda: True)
+
+    app_module.launch_tmux_session(
+        ctx,
+        agent="claude",
+        request="Organize my notes",
+        attach=False,
+        mode="run",
+        wait_seconds=0,
+    )
+
+    sent_prompts = [" ".join(args) for args in commands if args[:3] == ["tmux", "send-keys", "-t"]]
+    assert any("Obsidian CLI rules:" in prompt for prompt in sent_prompts)
+    assert any("obsidian rename" in prompt for prompt in sent_prompts)
+    assert any("Consider `obsidian move`" in prompt for prompt in sent_prompts)
+
+
+def test_build_apply_prompt_includes_obsidian_cli_fallback_rules(tmp_path: Path) -> None:
+    vault = tmp_path / "vault"
+    cli.main(["setup", str(vault)])
+    ctx = build_context(vault)
+    session = {
+        "session_id": "session-apply",
+        "agent": "codex",
+    }
+
+    prompt = app_module.build_apply_prompt(ctx, session, "# Proposal\n\n- Move note\n")
+
+    assert "prefer it for create, read," in prompt
+    assert "search, and rename actions" in prompt
+    assert "Treat `obsidian move` as optional" in prompt
+    assert "fall back to direct file" in prompt
+    assert "operations" in prompt
+
+
 def test_alias_enable_and_disable_use_configurable_bin_dir(tmp_path: Path, monkeypatch, capsys) -> None:
     bin_dir = tmp_path / "bin"
     monkeypatch.setenv("VSM_ALIAS_BIN_DIR", str(bin_dir))
