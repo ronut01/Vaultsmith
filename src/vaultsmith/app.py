@@ -213,41 +213,6 @@ def write_memory_files(ctx: VaultContext) -> None:
     )
 
 
-def render_bootstrap_header(agent: str, include_path: Path) -> str:
-    include_rel = include_path.relative_to(include_path.parent.parent.parent)
-    return textwrap.dedent(
-        f"""
-        # {agent.upper()} bootstrap for Vaultsmith
-
-        This vault is managed with Vaultsmith.
-
-        Read and follow `{include_rel.as_posix()}` before doing vault work.
-        """
-    ).strip() + "\n"
-
-
-def write_bootstrap_files(ctx: VaultContext) -> list[str]:
-    messages: list[str] = []
-    targets = {
-        "AGENTS.md": ctx.instructions_dir / "codex.md",
-        "CLAUDE.md": ctx.instructions_dir / "claude.md",
-    }
-
-    for filename, include_doc in targets.items():
-        destination = ctx.root / filename
-        if destination.exists():
-            messages.append(
-                f"Preserved existing {filename}; using {include_doc.relative_to(ctx.root)} instead."
-            )
-            continue
-        destination.write_text(
-            render_bootstrap_header(filename.replace(".md", ""), include_doc),
-            encoding="utf-8",
-        )
-        messages.append(f"Created {filename}")
-    return messages
-
-
 def write_config(ctx: VaultContext, default_agent: str = "codex") -> None:
     if ctx.config_path.exists():
         return
@@ -273,11 +238,9 @@ def setup_vault(path_arg: str, cwd: Path) -> str:
     write_instruction_docs(ctx)
     write_memory_files(ctx)
     write_config(ctx)
-    messages = write_bootstrap_files(ctx)
     return "\n".join(
         [
             f"Vaultsmith initialized at {ctx.root}",
-            *messages,
             "Use `vsm chat` from inside the vault to start an agent session.",
         ]
     )

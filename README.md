@@ -168,8 +168,6 @@ Running `vsm setup <vault>` creates a small control plane inside the target vaul
       approval.md
       receipt.md
       changes.json
-AGENTS.md
-CLAUDE.md
 ```
 
 Session files matter:

@@ -62,24 +62,30 @@ def test_setup_creates_expected_layout(tmp_path: Path, monkeypatch, capsys) -> N
     assert (vault / ".vaultsmith" / "config.toml").exists()
     assert (vault / ".vaultsmith" / "roles" / "input-agent.md").exists()
     assert (vault / ".vaultsmith" / "memory" / "vault-summary.md").exists()
-    assert (vault / "AGENTS.md").exists()
-    assert (vault / "CLAUDE.md").exists()
+    assert (vault / ".vaultsmith" / "instructions" / "codex.md").exists()
+    assert (vault / ".vaultsmith" / "instructions" / "claude.md").exists()
+    assert not (vault / "AGENTS.md").exists()
+    assert not (vault / "CLAUDE.md").exists()
     assert "Vaultsmith initialized" in capsys.readouterr().out
 
 
-def test_setup_preserves_existing_bootstrap_files(tmp_path: Path, monkeypatch, capsys) -> None:
+def test_setup_leaves_existing_root_bootstrap_files_untouched(tmp_path: Path, monkeypatch, capsys) -> None:
     vault = tmp_path / "vault"
     vault.mkdir()
     (vault / "AGENTS.md").write_text("keep me\n", encoding="utf-8")
+    (vault / "CLAUDE.md").write_text("keep me too\n", encoding="utf-8")
     monkeypatch.chdir(tmp_path)
 
     exit_code = cli.main(["setup", str(vault)])
 
     assert exit_code == 0
     assert (vault / "AGENTS.md").read_text(encoding="utf-8") == "keep me\n"
-    output = capsys.readouterr().out
-    assert "Preserved existing AGENTS.md" in output
+    assert (vault / "CLAUDE.md").read_text(encoding="utf-8") == "keep me too\n"
     assert (vault / ".vaultsmith" / "instructions" / "codex.md").exists()
+    assert (vault / ".vaultsmith" / "instructions" / "claude.md").exists()
+    output = capsys.readouterr().out
+    assert "Created AGENTS.md" not in output
+    assert "Created CLAUDE.md" not in output
 
 
 def test_status_uses_active_session_when_id_is_omitted(tmp_path: Path, monkeypatch, capsys) -> None:
