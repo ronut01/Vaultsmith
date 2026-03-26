@@ -90,6 +90,10 @@ source .venv/bin/activate
 python -m pip install vaultsmith
 ```
 
+### Obsidian CLI note
+
+If Vaultsmith chooses to use the `obsidian` CLI for vault-aware actions, remember that Obsidian CLI can operate on the currently active Obsidian vault instead of the shell's current working directory. In practice, that means Vaultsmith should be run from the intended vault root, and Obsidian should have that same vault active when CLI-backed actions matter.
+
 ### Install for local development
 
 If you are working on Vaultsmith itself:
