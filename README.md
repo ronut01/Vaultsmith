@@ -1,5 +1,9 @@
 # Vaultsmith
 
+[![CI](https://github.com/ronut01/Vaultsmith/actions/workflows/ci.yml/badge.svg)](https://github.com/ronut01/Vaultsmith/actions/workflows/ci.yml)
+[![PyPI version](https://img.shields.io/pypi/v/vaultsmith)](https://pypi.org/project/vaultsmith/)
+[![License](https://img.shields.io/github/license/ronut01/Vaultsmith)](https://github.com/ronut01/Vaultsmith/blob/main/LICENSE)
+
 **AI for Obsidian that works like the vault owner, not like a generic note bot.**
 
 Vaultsmith is a local agent launcher and review-first workflow for Obsidian vaults. It sets up vault-local instructions, starts `codex` or `claude` inside `tmux`, and gives the agent a constrained operating surface so note creation and organization can stay consistent with how the vault already works.
@@ -247,6 +251,22 @@ vsm setup /tmp/vsm-smoke-vault
 cd /tmp/vsm-smoke-vault
 vsm run -- "테스트 노트를 하나 만들고 지금 vault 상태를 설명해줘"
 ```
+
+## Contributing
+
+If you want to contribute, start here:
+
+- [CONTRIBUTING.md](CONTRIBUTING.md)
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- [docs/roadmap.md](docs/roadmap.md)
+
+Good first contributions are usually:
+
+- docs clarity
+- install and onboarding improvements
+- safer session UX
+- better tests
+- small CLI quality-of-life fixes
 
 ## Status
 

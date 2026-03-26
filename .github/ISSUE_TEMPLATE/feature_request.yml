@@ -1,0 +1,30 @@
+name: Feature request
+description: Suggest a new capability or workflow improvement.
+title: "[Feature] "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user problem are you trying to solve?
+      placeholder: It is hard to ...
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What should Vaultsmith do?
+      placeholder: Vaultsmith should ...
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Add examples, constraints, or related workflows.
+      placeholder: This matters because ...
+    validations:
+      required: false
