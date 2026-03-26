@@ -67,6 +67,18 @@ Requirements:
 - at least one supported agent CLI on `PATH`: `codex` or `claude`
 - optional but recommended: the `obsidian` CLI for vault-aware create/read/search/move/rename actions
 
+### Install `tmux`
+
+Vaultsmith launches agent sessions inside `tmux`, so `tmux` must be installed before `vsm chat` or `vsm run` can work.
+
+```bash
+# macOS
+brew install tmux
+
+# Ubuntu / Debian
+sudo apt-get install tmux
+```
+
 ### One-line install path
 
 The default install path is:
@@ -219,22 +231,15 @@ Users should be able to inspect, reject, or refine proposed changes before the a
 
 Most vault work is maintenance, not greenfield writing. The safe default is a narrow change.
 
-## Current scope vs. direction
+## Current scope
 
-Current scope:
+Vaultsmith currently includes:
 
 - local CLI
 - tmux-backed agent launch
 - vault bootstrap files
 - review-first session workflow
 - basic session state and approval handling
-
-Planned direction:
-
-- stronger vault-style profiling
-- better note placement and naming inference
-- more explicit explanation for why a note was titled or placed a certain way
-- better support for recurring note families like meetings, research notes, and project updates
 
 ## Development
 
@@ -261,15 +266,6 @@ If you want to contribute, start here:
 
 - [CONTRIBUTING.md](CONTRIBUTING.md)
 - [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
-- [docs/roadmap.md](docs/roadmap.md)
-
-Good first contributions are usually:
-
-- docs clarity
-- install and onboarding improvements
-- safer session UX
-- better tests
-- small CLI quality-of-life fixes
 
 ## Status
 
