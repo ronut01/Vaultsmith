@@ -74,7 +74,7 @@ The default install path is:
 pipx install vaultsmith
 vsm setup ~/Obsidian/MyVault
 cd ~/Obsidian/MyVault
-vsm run -- "정리해줘"
+vsm run -- "Organize my inbox notes"
 ```
 
 ### Why `pipx` is the default
@@ -112,7 +112,7 @@ vsm chat
 One-shot request:
 
 ```bash
-vsm run -- "현재 정리 안 된 노트 정리해줘"
+vsm run -- "Clean up my unfinished notes"
 ```
 
 ## Review-first workflow
@@ -122,7 +122,7 @@ Vaultsmith is designed so the agent proposes work before it applies work.
 Typical flow:
 
 ```bash
-vsm run -- "강의 영상 링크 정리해줘"
+vsm run -- "Organize my lecture video links"
 vsm review
 vsm approve
 vsm apply
@@ -249,7 +249,7 @@ Smoke test against a temporary vault:
 mkdir -p /tmp/vsm-smoke-vault
 vsm setup /tmp/vsm-smoke-vault
 cd /tmp/vsm-smoke-vault
-vsm run -- "테스트 노트를 하나 만들고 지금 vault 상태를 설명해줘"
+vsm run -- "Create a test note and explain the current vault state"
 ```
 
 ## Contributing
